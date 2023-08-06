@@ -1,4 +1,6 @@
 import os
+import tempfile
+import uuid
 
 import openai
 from PIL import Image
@@ -9,20 +11,25 @@ load_dotenv(find_dotenv())
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def generate_image(prompt: str) -> str:
+def generate_image(prompt: str, n: int, size: str) -> str:
     response = openai.Image.create(
         prompt=prompt,
-        n=1,
-        size="512x512"
+        n=n,
+        size=size
     )
 
-    return response['data'][0]['url']
+    return response['data']
 
-def handle_input(text: str) -> Image:
-    url = generate_image(text)
-    print(url)
-    request.urlretrieve(
-        url,
-        "sample.png")
-    image = Image.open('sample.png')
-    return image
+def handle_input(text: str, n: float, size: str) -> Image:
+    urls = generate_image(text, int(n), size)
+    image_paths = []
+    for url in urls:
+        image_path = os.path.join(
+            tempfile.gettempdir(),
+            f'{uuid.uuid1()}.png'
+        )
+        request.urlretrieve(
+            url['url'],
+            image_path)
+        image_paths.append(image_path)
+    return image_paths
